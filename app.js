@@ -12,22 +12,28 @@ function printMessage(username, badgeCount, point) {
 
 
 function getProfile(username) {
-  //Connect to the API URL (https://teamtreehouse.com/<username>.json)
-  const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
-    let body = "";
-    //Read the data when it loads, hence the on.(data) method.  JSON data is delivered in chunks so it keeps adding data to the body variable as it loads in the form of a string.
-    response.on('data', data => {
-      body += data.toString();
+  try{
+    //Connect to the API URL (https://teamtreehouse.com/<username>.json)
+    const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
+      let body = "";
+      //Read the data when it loads, hence the on.(data) method.  JSON data is delivered in chunks so it keeps adding data to the body variable as it loads in the form of a string.
+      response.on('data', data => {
+        body += data.toString();
+      });
+      
+      //Once all of the data is loaded it parses it and displays it to the console.
+      response.on('end', () => {
+        //Parse the data because it's a string
+        let profile = JSON.parse(body);
+        //Print the data from the API
+        printMessage(username, profile.badges.length, profile.points.JavaScript);
+      });
     });
-    
-    //Once all of the data is loaded it parses it and displays it to the console.
-    response.on('end', () => {
-      //Parse the data because it's a string
-      let profile = JSON.parse(body);
-      //Print the data from the API
-      printMessage(username, profile.badges.length, profile.points.JavaScript);
-    });
-  });
+  
+    request.on('error', error => console.error(`Problem with request: ${error.message}`));
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 //To enable the user to add the names it wants to grab at the end of the node app.js command it's...
